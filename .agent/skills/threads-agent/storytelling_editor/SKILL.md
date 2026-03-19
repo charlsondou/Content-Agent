@@ -45,8 +45,8 @@ description: 將內容轉化為高品質 Threads 貼文的技能。具備 YouTub
 
 ### 2. 風格分析 (Analyze - CSV 模仿)
 
-找出專案中的 CSV 檔案（例如：`Dou’s Content....csv`），重點分析 `Caption` (內文) 與 `Title` (標題) 欄位，結合 Youtuber 語氣，模仿原作者的寫作 DNA：
-*   **排版格式**：Threads 偏好極簡、一句一行的呼吸感嗎？
+找出專案中的 CSV 檔案（例如：`Content....csv`），重點分析 `Caption` (內文) 與 `Title` (標題) 欄位，結合 Youtuber 語氣，模仿原作者的寫作 DNA：
+*   **排版格式**：嚴格觀察 CSV 範例中的換行與段落長度，對方是集中成段落，還是每一句話都空行？請完全模仿。
 *   **用語習慣**：語氣是說教、分享、自嘲還是憤世嫉俗？
 *   **表情符號**：使用頻率？特定慣用 Emoji？
 

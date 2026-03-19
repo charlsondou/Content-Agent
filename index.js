@@ -118,7 +118,7 @@ app.post('/api/generate', async (req, res) => {
                 }
 
                 if (authorCsvContent) {
-                    promptMessage += `\n\n【寫作 DNA 參考與模仿】：\n請掃描以下 CSV 資料中的 \`Caption\` 與 \`Title\` 欄位，深度模仿該作者的寫作 DNA：\n1. 排版格式：他喜歡空行嗎？（通常 Threads 貼文喜歡一句一行或極簡短的段落）。是否有特定的分隔線習慣？（例如 === 或 ---）。列表是用 - 還是 🔸？\n2. 用語習慣：喜歡用「我」還是「我們」？語氣是說教、分享、自嘲還是憤世嫉俗？是否使用特定的口語或網路用語？\n3. 表情符號 (Emoji)：使用頻率如何？喜歡用哪些特定的 Emoji？（如 🔥, 🧵, 👇）\n<author_csv_data>\n${authorCsvContent}\n</author_csv_data>`;
+                    promptMessage += `\n\n【寫作 DNA 參考與模仿】：\n請掃描以下 CSV 資料中的 \`Caption\` 與 \`Title\` 欄位，深度模仿該作者的寫作 DNA：\n1. 排版格式與換行節奏 (極重要)：請精準觀察原作者是「每一句話都空一整行」，還是「多句話相連成一個段落後才空行」。請絕對依照作者真實的換行頻率來排版，不要盲目地每一句話都強制加空白行。有沒有特定的分隔線習慣（例如 === 或 ---）？列表號碼是用 - 還是 🔸？\n2. 用語習慣：喜歡用「我」還是「我們」？語氣是說教、客觀分享、自嘲還是憤世嫉俗？\n3. 表情符號 (Emoji)：使用頻率如何？\n<author_csv_data>\n${authorCsvContent}\n</author_csv_data>`;
                 }
 
                 promptMessage += `\n\n【重要指令】：請直接輸出最終的貼文內容，**不要**包含任何思考過程、段落標題、分析說明或是多餘的聊天文字。這是一個自動化 API 操作，請絕對只要回傳可以直接發布的貼文本文。`;
