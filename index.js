@@ -79,9 +79,15 @@ app.post('/api/generate', async (req, res) => {
             const files = fs.readdirSync(dnaFolderPath).filter(f => f.toLowerCase().endsWith('.csv'));
             if (files.length > 0) {
                 const csvFile = path.join(dnaFolderPath, files[0]);
-                // 讀取檔案，為避免檔案過大造成 token 爆炸，這邊可以直接讀取字串
-                authorCsvContent = fs.readFileSync(csvFile, 'utf8');
-                console.log(`[${new Date().toISOString()}] Loaded Author DNA CSV: ${files[0]}`);
+                // 讀取檔案，為避免檔案過大 (如超過 200k token) 造成從 API 崩潰，加上防呆截斷
+                const rawCsv = fs.readFileSync(csvFile, 'utf8');
+                const MAX_CSV_LENGTH = 300000; // 約 75,000 tokens
+                
+                authorCsvContent = rawCsv.length > MAX_CSV_LENGTH 
+                    ? rawCsv.substring(0, MAX_CSV_LENGTH) + "\n\n...[截斷：原檔案太大，僅保留部分內容供風格分析]"
+                    : rawCsv;
+                    
+                console.log(`[${new Date().toISOString()}] Loaded Author DNA CSV: ${files[0]} (Length: ${authorCsvContent.length})`);
             }
         }
     } catch (csvError) {
