@@ -81,7 +81,9 @@ app.post('/api/generate', async (req, res) => {
                 const csvFile = path.join(dnaFolderPath, files[0]);
                 // 讀取檔案，為避免檔案過大 (如超過 200k token) 造成從 API 崩潰，加上防呆截斷
                 const rawCsv = fs.readFileSync(csvFile, 'utf8');
-                const MAX_CSV_LENGTH = 300000; // 約 75,000 tokens
+                // 中文字元在部分模型 (如 StepFun) 會被計算為接近 1:1 或更多的 tokens，
+                // 為了安全起見，將截斷限制大幅下調至 50,000 字元 (約數十至上百篇貼文，絕對夠分析風格)
+                const MAX_CSV_LENGTH = 50000; 
                 
                 authorCsvContent = rawCsv.length > MAX_CSV_LENGTH 
                     ? rawCsv.substring(0, MAX_CSV_LENGTH) + "\n\n...[截斷：原檔案太大，僅保留部分內容供風格分析]"
