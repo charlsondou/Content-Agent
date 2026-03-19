@@ -67,3 +67,8 @@ node parse_pdf.js <輸入檔案路徑> <輸出檔案路徑>
 # 例如
 node parse_pdf.js ./assets/book.pdf ./assets/book_output.md
 ```
+
+### 寫作 DNA 模仿 (Author DNA)
+我們備有強大的「寫作 DNA 模仿」功能。
+請在專案根目錄下尋找或建立 `author_dna` 資料夾。在這個資料夾中，請放入**唯一一個包含過往貼文資料的 `.csv` 檔案**（通常標頭需包含 `Title` 標題與 `Caption` 內文等欄位）。
+只要該目錄中存在這個 `.csv` 檔案，當您呼叫 API 產生貼文時，系統就會自動將整份 CSV 餵給 AI，並要求它分析且**完全模仿該作者的排版格式、用語習慣以及 Emoji 使用頻率**。
