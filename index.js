@@ -42,15 +42,18 @@ if (!RETURN_WEBHOOK_URL) {
 app.post('/api/generate', async (req, res) => {
     const { notion_id, content, type, ideas } = req.body;
 
-    if (!notion_id || !type || !Array.isArray(type)) {
-        return res.status(400).json({ error: "Missing required fields or 'type' is not an array." });
+    if (!notion_id || !type) {
+        return res.status(400).json({ error: "Missing required fields: notion_id and type are required." });
     }
+
+    // 支援原本的多選 (Array) 以及新的單選 (String)
+    const typeArray = Array.isArray(type) ? type : [type];
 
     if (!content && !ideas) {
         return res.status(400).json({ error: "At least one of 'content' or 'ideas' must be provided." });
     }
 
-    if (type.includes('do_nothing')) {
+    if (typeArray.includes('do_nothing')) {
         console.log(`[${new Date().toISOString()}] 'do_nothing' received for ${notion_id}. Skipping generation.`);
         if (RETURN_WEBHOOK_URL) {
             axios.post(RETURN_WEBHOOK_URL, {
@@ -62,7 +65,7 @@ app.post('/api/generate', async (req, res) => {
     }
 
     const validSkills = ['news_reporter', 'social_media_editor', 'storytelling_editor', 'interactive_storyteller', 'insight_post_generator'];
-    const skillsToProcess = type.filter(skill => validSkills.includes(skill));
+    const skillsToProcess = typeArray.filter(skill => validSkills.includes(skill));
 
     if (skillsToProcess.length === 0) {
         console.log(`[${new Date().toISOString()}] No valid skills provided for ${notion_id}. Processing skipped.`);
