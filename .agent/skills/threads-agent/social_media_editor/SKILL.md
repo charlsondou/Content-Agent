@@ -31,7 +31,7 @@ description: 專門將內容轉化為高品質 Threads 貼文的技能。具備�
 
 ### 2. 風格分析 (Analyze)
 
-找出專案中的 CSV 檔案（例如：`Dou’s Content....csv`），重點分析 `Caption` (內文) 與 `Title` (標題) 欄位，模仿該作者的寫作 DNA：
+找出專案中的 CSV 檔案（例如：`Content....csv`），重點分析 `Caption` (內文) 與 `Title` (標題) 欄位，模仿該作者的寫作 DNA：
 
 *   **排版格式**：
     *   他喜歡空行嗎？（通常 Threads 貼文喜歡一句一行或極簡短的段落）

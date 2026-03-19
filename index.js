@@ -50,13 +50,6 @@ app.post('/api/generate', async (req, res) => {
         return res.status(400).json({ error: "At least one of 'content' or 'ideas' must be provided." });
     }
 
-    // 1. Immediately respond to n8n to close the connection and prevent timeout
-    res.status(200).json({
-        message: "Request received. Processing in background.",
-        notion_id,
-        processing_types: type
-    });
-
     if (type.includes('do_nothing')) {
         console.log(`[${new Date().toISOString()}] 'do_nothing' received for ${notion_id}. Skipping generation.`);
         if (RETURN_WEBHOOK_URL) {
@@ -65,7 +58,7 @@ app.post('/api/generate', async (req, res) => {
                 results: { draft: "Skipped processing as requested." }
             }).catch(e => console.error("Webhook error:", e.message));
         }
-        return;
+        return res.status(200).json({ success: true, results: { draft: "Skipped processing as requested." } });
     }
 
     const validSkills = ['news_reporter', 'social_media_editor', 'storytelling_editor', 'interactive_storyteller', 'insight_post_generator'];
@@ -73,7 +66,7 @@ app.post('/api/generate', async (req, res) => {
 
     if (skillsToProcess.length === 0) {
         console.log(`[${new Date().toISOString()}] No valid skills provided for ${notion_id}. Processing skipped.`);
-        return;
+        return res.status(400).json({ success: false, error: "No valid skills provided." });
     }
 
     // 2. Process in background
@@ -100,6 +93,8 @@ app.post('/api/generate', async (req, res) => {
                     promptMessage += `請根據以下原創作者的行文思路或想法，為我撰寫一篇 Threads 貼文：\n\n<author_ideas>\n${ideas}\n</author_ideas>`;
                 }
 
+                promptMessage += `\n\n【重要指令】：請直接輸出最終的貼文內容，**不要**包含任何思考過程、段落標題、分析說明或是多餘的聊天文字。這是一個自動化 API 操作，請絕對只要回傳可以直接發布的貼文本文。`;
+
                 // Call OpenRouter API
                 const response = await openai.chat.completions.create({
                     model: process.env.OPENROUTER_MODEL || "google/gemini-2.5-pro",
@@ -122,24 +117,35 @@ app.post('/api/generate', async (req, res) => {
 
         const completedResults = await Promise.all(generationPromises);
 
-        // Format results to uniformly use 'draft' as the key
-        const draftContent = completedResults.map(item => item.result || item.error).join('\n\n---\n\n');
+        const errors = completedResults.filter(item => item.error);
+        if (errors.length > 0) {
+            const errorDetails = errors.map(e => `[${e.skill}] ${e.error}`).join('; ');
+            return res.status(500).json({ success: false, error: `Generation failed: ${errorDetails}` });
+        }
 
-        // 3. Send results back to n8n Webhook
-        console.log(`[${new Date().toISOString()}] Finished processing ${notion_id}. Sending to n8n webhook...`);
+        // Format results to uniformly use 'draft' as the key
+        const draftContent = completedResults.map(item => item.result).join('\n\n---\n\n');
+
+        // 3. Send results back
+        console.log(`[${new Date().toISOString()}] Finished processing ${notion_id}.`);
 
         if (RETURN_WEBHOOK_URL) {
-            await axios.post(RETURN_WEBHOOK_URL, {
+            axios.post(RETURN_WEBHOOK_URL, {
                 notion_id: notion_id,
                 results: { draft: draftContent }
-            });
-            console.log(`Successfully sent webhook data for ${notion_id} to n8n.`);
-        } else {
-            console.log("Skipping sending to n8n (RETURN_WEBHOOK_URL is missing). Here are the results:", { draft: draftContent });
+            }).catch(e => console.error("Webhook error:", e.message));
         }
+
+        return res.status(200).json({
+            success: true,
+            results: { draft: draftContent }
+        });
 
     } catch (globalError) {
         console.error(`[${new Date().toISOString()}] Critical error processing ${notion_id}:`, globalError);
+        if (!res.headersSent) {
+            return res.status(500).json({ success: false, error: globalError.message });
+        }
     }
 });
 
